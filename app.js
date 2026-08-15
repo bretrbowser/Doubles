@@ -11,11 +11,12 @@
     levelId: 'easy',
     scenario: null,
     stepIndex: 0,
-    stepScores: [],
+    stepResults: [],      // per ball: { score, pick, dist, hintUsed }
     pick: null,
     locked: false,
     hintUsed: false,
-    phase: 'ask'          // 'ask' -> primary locks in; 'result' -> primary advances
+    phase: 'ask',         // 'ask' -> primary locks in; 'result' -> primary advances
+    mode: 'play'          // 'play' | 'review' (re-reading one ball) | 'retry'
   };
 
   var progress = load();
@@ -27,10 +28,9 @@
       var raw = localStorage.getItem(STORE_KEY);
       var p = raw ? JSON.parse(raw) : {};
       if (!p.scores) p.scores = {};
-      if (typeof p.unlockAll !== 'boolean') p.unlockAll = false;
       return p;
     } catch (e) {
-      return { scores: {}, unlockAll: false };
+      return { scores: {} };
     }
   }
 
@@ -74,13 +74,6 @@
     }).length;
   }
 
-  function isLocked(levelId) {
-    if (progress.unlockAll) return false;
-    if (levelId === 'medium') return levelDone('easy') < 3;
-    if (levelId === 'hard') return levelDone('medium') < 3;
-    return false;
-  }
-
   function scoreFor(d, perfect, good) {
     if (d <= perfect) return 100;
     if (d <= good) return Math.round(100 - 40 * (d - perfect) / (good - perfect));
@@ -118,24 +111,15 @@
     wrap.innerHTML = '';
     LEVELS.forEach(function (lvl) {
       var list = byLevel(lvl.id);
-      var locked = isLocked(lvl.id);
       var btn = document.createElement('button');
-      btn.className = 'level-card lvl-' + lvl.id + (locked ? ' locked' : '');
+      btn.className = 'level-card lvl-' + lvl.id;
       btn.innerHTML =
         '<span class="level-badge">' + lvl.badge + '</span>' +
-        '<span><h3>' + lvl.name + '</h3><span class="fine">' +
-          (locked
-            ? (lvl.id === 'medium' ? 'Clear 3 Easy scenarios to unlock' : 'Clear 3 Medium scenarios to unlock')
-            : lvl.blurb) +
-        '</span></span>' +
+        '<span><h3>' + lvl.name + '</h3><span class="fine">' + lvl.blurb + '</span></span>' +
         '<span class="level-meta"><b>' + levelStars(lvl.id) + '/' + (list.length * 3) + '</b><span>★ earned</span></span>';
-      btn.addEventListener('click', function () {
-        if (locked) return;
-        openLevel(lvl.id);
-      });
+      btn.addEventListener('click', function () { openLevel(lvl.id); });
       wrap.appendChild(btn);
     });
-    $('unlock-all').checked = progress.unlockAll;
   }
 
   /* ---------------- level ---------------- */
@@ -168,7 +152,8 @@
   function startScenario(scn) {
     state.scenario = scn;
     state.stepIndex = 0;
-    state.stepScores = [];
+    state.stepResults = [];
+    state.mode = 'play';
     show('screen-play');
     $('play-title').textContent = scn.title;
     $('play-role').textContent = scn.role;
@@ -184,8 +169,8 @@
     wrap.innerHTML = '';
     state.scenario.steps.forEach(function (_, i) {
       var d = document.createElement('i');
-      if (i < state.stepIndex) d.className = 'done';
-      else if (i === state.stepIndex) d.className = 'now';
+      if (i === state.stepIndex) d.className = 'now';
+      else if (state.stepResults[i]) d.className = 'done';
       wrap.appendChild(d);
     });
   }
@@ -204,7 +189,10 @@
     $('ask-kind').textContent = step.kind === 'hit'
       ? 'Tap where the ball should land' : 'Tap where you should move';
     $('prompt-text').textContent =
-      (state.stepIndex === 0 ? state.scenario.situation + ' ' : '') + step.prompt;
+      (state.stepIndex === 0 && state.mode === 'play' ? state.scenario.situation + ' ' : '') + step.prompt;
+    $('play-role').textContent = state.mode === 'retry'
+      ? 'Ball ' + (state.stepIndex + 1) + ' · another go'
+      : state.scenario.role;
 
     $('ask-block').classList.remove('hidden');
     $('result-block').classList.add('hidden');
@@ -246,24 +234,21 @@
     var d = Court.dist(state.pick, step.target);
     var score = scoreFor(d, step.perfect, step.good);
     if (state.hintUsed) score = Math.min(score, 75);
-    state.stepScores.push(score);
+
+    // Keyed by index, not pushed, so re-answering one ball replaces it in place.
+    var res = { score: score, pick: state.pick, dist: d, hintUsed: state.hintUsed };
+    state.stepResults[state.stepIndex] = res;
 
     Court.drawTarget(step.target, step.perfect, step.good, state.pick);
-
-    var g = gradeFor(score);
-    $('verdict-grade').textContent = g.label;
-    $('verdict-grade').className = g.cls;
-    $('verdict-score').textContent = score + '/100' + (state.hintUsed ? ' (hint used)' : '');
-    $('verdict-dist').textContent = 'You were ' + d.toFixed(1) + ' ft from the coach\'s spot. Green circle = full marks.';
-    $('coach-text').textContent = step.coach;
+    showVerdict(step, res);
 
     $('ask-block').classList.add('hidden');
     $('result-block').classList.remove('hidden');
     $('hint-btn').disabled = true;
 
     var primary = $('primary-btn');
-    primary.textContent =
-      state.stepIndex < state.scenario.steps.length - 1 ? 'Next ball' : 'See summary';
+    primary.textContent = state.mode === 'retry' ? 'Back to results'
+      : state.stepIndex < state.scenario.steps.length - 1 ? 'Next ball' : 'See summary';
     // The button under the thumb just changed meaning. Hold it inert briefly so
     // a fast second tap cannot skip past coaching that was never read.
     primary.disabled = true;
@@ -275,7 +260,57 @@
     updateFade();
   }
 
+  function showVerdict(step, res) {
+    var g = gradeFor(res.score);
+    $('verdict-grade').textContent = g.label;
+    $('verdict-grade').className = g.cls;
+    $('verdict-score').textContent = res.score + '/100' + (res.hintUsed ? ' (hint used)' : '');
+    $('verdict-dist').textContent = 'You were ' + res.dist.toFixed(1) +
+      ' ft from the coach\'s spot. Green circle = full marks.';
+    $('coach-text').textContent = step.coach;
+  }
+
+  /* Open one ball from the summary: the court, where you put yourself, and
+     where the coach wanted you — so you can study the actual location. */
+  function openReview(i) {
+    state.mode = 'review';
+    state.stepIndex = i;
+    state.locked = true;      // taps are inert until they ask for another go
+    state.phase = 'result';
+
+    var step = currentStep();
+    var res = state.stepResults[i];
+
+    show('screen-play');
+    $('play-title').textContent = state.scenario.title;
+    $('play-role').textContent =
+      'Ball ' + (i + 1) + ' of ' + state.scenario.steps.length + ' · reviewing';
+    renderDots();
+
+    Court.clearAll();
+    Court.drawFrame(step);
+    if (res && res.pick) Court.drawPick(res.pick, step.you, step.kind);
+    Court.drawTarget(step.target, step.perfect, step.good, res ? res.pick : null);
+    playBall();
+
+    if (res) showVerdict(step, res);
+    $('ask-block').classList.add('hidden');
+    $('result-block').classList.remove('hidden');
+    $('hint-btn').disabled = true;
+    $('primary-btn').textContent = 'Try this ball again';
+    $('primary-btn').disabled = false;
+    $('sheet-scroll').scrollTop = 0;
+    updateFade();
+  }
+
+  function retryBall() {
+    state.mode = 'retry';
+    renderStep();
+  }
+
   function nextStep() {
+    // Reviewing or re-taking a single ball always lands back on the summary.
+    if (state.mode !== 'play') { finishScenario(); return; }
     if (state.stepIndex < state.scenario.steps.length - 1) {
       state.stepIndex++;
       renderStep();
@@ -298,8 +333,9 @@
 
   function finishScenario() {
     var scn = state.scenario;
-    var total = state.stepScores.reduce(function (a, b) { return a + b; }, 0);
-    var avg = Math.round(total / state.stepScores.length);
+    var done = state.stepResults.filter(Boolean);
+    var total = done.reduce(function (a, r) { return a + r.score; }, 0);
+    var avg = done.length ? Math.round(total / done.length) : 0;
     var stars = starsFor(avg);
 
     var prev = progress.scores[scn.id];
@@ -316,10 +352,22 @@
     $('sum-eyebrow').textContent = stars === 3 ? 'Nailed it' : stars === 0 ? 'Worth another look' : 'Scenario complete';
 
     var rows = '';
-    state.stepScores.forEach(function (s, i) {
-      rows += '<div class="row"><i>' + (i + 1) + '</i><span>' + gradeFor(s).label + '</span><b>' + s + '</b></div>';
+    state.stepResults.forEach(function (r, i) {
+      if (!r) return;
+      rows += '<button class="row" type="button" data-step="' + i + '">' +
+                '<i>' + (i + 1) + '</i>' +
+                '<span>' + gradeFor(r.score).label + '</span>' +
+                '<b>' + r.score + '</b><em aria-hidden="true">›</em>' +
+              '</button>';
     });
-    $('sum-steps').innerHTML = '<h3>Ball by ball</h3>' + rows;
+    $('sum-steps').innerHTML =
+      '<h3>Ball by ball</h3><p class="fine" style="margin-bottom:4px">' +
+      'Tap a ball to see that spot again.</p>' + rows;
+    Array.prototype.forEach.call($('sum-steps').querySelectorAll('[data-step]'), function (el) {
+      el.addEventListener('click', function () {
+        openReview(parseInt(el.getAttribute('data-step'), 10));
+      });
+    });
 
     var list = byLevel(scn.level);
     var idx = list.indexOf(scn);
@@ -350,6 +398,7 @@
     window.addEventListener('resize', updateFade);
 
     $('primary-btn').addEventListener('click', function () {
+      if (state.mode === 'review') { retryBall(); return; }
       if (state.phase === 'ask') lockIn(); else nextStep();
     });
     $('hint-btn').addEventListener('click', useHint);
@@ -358,6 +407,7 @@
     $('replay-btn').addEventListener('click', playBall);
     $('quit-btn').addEventListener('click', function () {
       Court.stopAnim();
+      if (state.mode !== 'play') { finishScenario(); return; }
       openLevel(state.levelId);
     });
     $('sum-retry').addEventListener('click', function () { startScenario(state.scenario); });
@@ -370,15 +420,9 @@
       });
     });
 
-    $('unlock-all').addEventListener('change', function (e) {
-      progress.unlockAll = e.target.checked;
-      save();
-      renderHome();
-    });
-
     $('reset-progress').addEventListener('click', function () {
       if (!window.confirm('Wipe all scores and stars?')) return;
-      progress = { scores: {}, unlockAll: progress.unlockAll };
+      progress = { scores: {} };
       save();
       renderHome();
     });

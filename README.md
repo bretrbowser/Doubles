@@ -196,8 +196,17 @@ Between `perfect` and `good` it slides from 100 down to 60. Beyond that it falls
 away to zero. Taking a hint caps that step at 75.
 
 A scenario's score is the average of its steps: 88+ earns three stars, 68+ two,
-45+ one. Medium unlocks after three Easy scenarios are cleared, Hard after three
-Medium — or tick **Unlock everything** on the home screen and ignore all that.
+45+ one.
+
+**All three levels are open from the start.** There is no login, so gating
+progress behind earlier levels would only stop people reaching the content —
+anyone clearing their browser data would be locked out of their own progress.
+
+On the results screen every ball links back to its own decision: tapping one
+reopens that moment on the court with your tap, the coach's spot and the
+distance between them, and offers another go at that single ball. Re-answering
+replaces just that ball's score and recomputes the scenario average, so you can
+drill one location without replaying the whole point.
 
 ---
 
