@@ -29,6 +29,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          # Switches Pages on by itself the first time, so there is no
+          # Settings -> Pages step to remember. Requires a public repo
+          # (or GitHub Pro) — Pages will not serve a private repo for free.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
