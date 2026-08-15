@@ -144,8 +144,15 @@ var Court = (function () {
 
   /* ---------------- the player's pick ---------------- */
 
-  function drawPick(pos, from, kind) {
+  /* `dragging` draws full-length guide lines through the point. A fingertip
+     covers roughly 44px and the full-credit radius is smaller than that, so
+     without guides that reach past the finger you cannot see what you picked. */
+  function drawPick(pos, from, kind, dragging) {
     clear('pick');
+    if (dragging) {
+      layers.pick.appendChild(el('line', { class: 'reticle', x1: pos.x, y1: -45, x2: pos.x, y2: 45 }));
+      layers.pick.appendChild(el('line', { class: 'reticle', x1: -23, y1: pos.y, x2: 23, y2: pos.y }));
+    }
     if (from && kind !== 'hit') {
       layers.pick.appendChild(el('line', {
         class: 'move-arrow', x1: from.x, y1: from.y, x2: pos.x, y2: pos.y

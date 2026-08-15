@@ -187,7 +187,7 @@
     Court.drawFrame(step);
 
     $('ask-kind').textContent = step.kind === 'hit'
-      ? 'Tap where the ball should land' : 'Tap where you should move';
+      ? 'Place the ball — drag to adjust' : 'Place yourself — drag to adjust';
     $('prompt-text').textContent =
       (state.stepIndex === 0 && state.mode === 'play' ? state.scenario.situation + ' ' : '') + step.prompt;
     $('play-role').textContent = state.mode === 'retry'
@@ -211,18 +211,52 @@
     Court.playPath(step.ballPath || [], null);
   }
 
-  function onCourtTap(ev) {
-    if (state.locked || !state.scenario) return;
-    var t = ev.touches ? ev.touches[0] : ev;
-    var p = Court.toCourt(t.clientX, t.clientY);
-    if (!p) return;
-    // keep taps somewhere sane
-    p.x = Math.max(-23, Math.min(23, p.x));
-    p.y = Math.max(-47, Math.min(47, p.y));
+  /* ---------------- placing your answer ----------------
+     Press to place, then slide to fine-tune. The full-credit radius is smaller
+     than a fingertip on every phone size, so a single tap cannot be precise and
+     the finger hides the mark while it is down. Dragging fixes both: guide lines
+     extend past the hand, and the mark is visible the moment you lift. */
+
+  var dragging = false;
+
+  function courtPoint(ev) {
+    var p = Court.toCourt(ev.clientX, ev.clientY);
+    if (!p) return null;
+    p.x = Math.max(-22, Math.min(22, p.x));
+    p.y = Math.max(-44, Math.min(44, p.y));
+    return p;
+  }
+
+  function setPick(p, isDragging) {
     state.pick = p;
     var step = currentStep();
-    Court.drawPick(p, step.you, step.kind);
+    Court.drawPick(p, step.you, step.kind, isDragging);
     $('primary-btn').disabled = false;
+  }
+
+  function onPointerDown(ev) {
+    if (state.locked || !state.scenario || state.phase !== 'ask') return;
+    var p = courtPoint(ev);
+    if (!p) return;
+    dragging = true;
+    var svg = $('court');
+    if (svg.setPointerCapture) { try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ } }
+    setPick(p, true);
+    ev.preventDefault();
+  }
+
+  function onPointerMove(ev) {
+    if (!dragging) return;
+    var p = courtPoint(ev);
+    if (!p) return;
+    setPick(p, true);
+    ev.preventDefault();
+  }
+
+  function onPointerUp() {
+    if (!dragging) return;
+    dragging = false;
+    if (state.pick) setPick(state.pick, false);   // drop the guide lines
   }
 
   function lockIn() {
@@ -391,9 +425,13 @@
   function init() {
     Court.init();
 
-    // `click` fires on touch devices too, and touch-action:manipulation on the
-    // svg removes the double-tap delay — so one listener covers both.
-    $('court').addEventListener('click', onCourtTap);
+    // Pointer events cover touch, pen and mouse with one code path.
+    // touch-action:none on the svg stops the browser stealing the drag.
+    var court = $('court');
+    court.addEventListener('pointerdown', onPointerDown);
+    court.addEventListener('pointermove', onPointerMove);
+    court.addEventListener('pointerup', onPointerUp);
+    court.addEventListener('pointercancel', onPointerUp);
     $('sheet-scroll').addEventListener('scroll', updateFade, { passive: true });
     window.addEventListener('resize', updateFade);
 

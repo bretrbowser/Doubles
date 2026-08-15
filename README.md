@@ -2,7 +2,8 @@
 
 A tennis doubles positioning trainer for phones. Fifteen coached scenarios across
 three levels. A point plays out on a court, the ball freezes at the moment of
-decision, and you tap where you should be.
+decision, and you place yourself where you should be — press the court, then
+slide to fine-tune before locking it in.
 
 You are always the **gold** player at the bottom of the screen. Your partner is
 **blue**. The opponents are **red**.
@@ -188,6 +189,23 @@ level screens are built from that array, and the star totals adjust themselves.
 | `scenarios.js` | **The coaching content.** |
 | `app.js` | Screen flow, scoring, star ratings, saved progress. |
 | `.github/workflows/deploy.yml` | Publishes the site on every push. |
+
+### Touch precision, small screens and landscape
+
+Full credit means landing within a few feet of the coach's spot, which on a phone
+is a target smaller than a fingertip — about 18px on a large phone and 10px on a
+small one. So placement is **press-and-drag**, not tap: while you hold, guide
+lines run the full width and height of the court through your point, staying
+visible past your hand, and the mark is scored where you *release*.
+
+Two layout rules protect that precision:
+
+- Under 660px tall, the sheet is capped at 38dvh and type steps down, because
+  the sheet was originally sized on a large phone and was taking half of a small
+  one — leaving a court too small to aim at.
+- Landscape under 600px tall switches to a grid: court on the left at full
+  height, coaching in a column on the right. Stacked, a landscape court was
+  about 130px tall and effectively unplayable.
 
 ### How scoring works
 
