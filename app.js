@@ -5,7 +5,10 @@
 (function () {
   'use strict';
 
-  var STORE_KEY = 'doublesiq.progress.v2';
+  // Progress is stored per player so a shared phone does not mean shared stars.
+  // The pre-profiles key doubles as the namespace prefix: "<KEY>::<playerId>".
+  var LEGACY_KEY = 'doublesiq.progress.v2';
+  var PLAYERS_KEY = 'doublesiq.players.v1';
 
   var state = {
     levelId: 'easy',
@@ -19,23 +22,120 @@
     mode: 'play'          // 'play' | 'review' (re-reading one ball) | 'retry'
   };
 
+  var players = loadPlayers();
+  adoptLegacyProgress();
   var progress = load();
 
   /* ---------------- storage ---------------- */
 
-  function load() {
+  // Every read and write is guarded: Safari private browsing throws on both.
+  function readJSON(key, fallback) {
     try {
-      var raw = localStorage.getItem(STORE_KEY);
-      var p = raw ? JSON.parse(raw) : {};
-      if (!p.scores) p.scores = {};
-      return p;
-    } catch (e) {
-      return { scores: {} };
-    }
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
   }
 
-  function save() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* private mode */ }
+  function writeJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* private mode */ }
+  }
+
+  function dropKey(key) {
+    try { localStorage.removeItem(key); } catch (e) { /* private mode */ }
+  }
+
+  function progressKeyFor(id) { return LEGACY_KEY + '::' + id; }
+  function progressKey() { return progressKeyFor(players.activeId); }
+
+  function loadPlayers() {
+    var saved = readJSON(PLAYERS_KEY, null);
+    if (saved && saved.list && saved.list.length) return saved;
+    var seeded = { list: [{ id: 'p1', name: 'Player 1' }], activeId: 'p1' };
+    writeJSON(PLAYERS_KEY, seeded);
+    return seeded;
+  }
+
+  /* Adopt progress saved before profiles existed. Deliberately independent of
+     whether the roster was just seeded — if the roster is written first and the
+     old key is spotted afterwards, those stars would otherwise be stranded. */
+  function adoptLegacyProgress() {
+    var legacy = readJSON(LEGACY_KEY, null);
+    if (!legacy || !legacy.scores) return;
+    var key = progressKeyFor(players.activeId);
+    var already = readJSON(key, null);
+    var empty = !already || !already.scores ||
+                !Object.keys(already.scores).length;
+    if (empty) writeJSON(key, legacy);   // never clobber real progress
+    dropKey(LEGACY_KEY);
+  }
+
+  function savePlayers() { writeJSON(PLAYERS_KEY, players); }
+
+  function activePlayer() {
+    for (var i = 0; i < players.list.length; i++) {
+      if (players.list[i].id === players.activeId) return players.list[i];
+    }
+    return players.list[0];
+  }
+
+  function load() {
+    var p = readJSON(progressKey(), null) || {};
+    if (!p.scores) p.scores = {};
+    return p;
+  }
+
+  function save() { writeJSON(progressKey(), progress); }
+
+  function starsForPlayer(id) {
+    var pr = readJSON(progressKeyFor(id), null);
+    var total = 0;
+    if (pr && pr.scores) {
+      for (var k in pr.scores) {
+        if (pr.scores.hasOwnProperty(k)) total += pr.scores[k].stars || 0;
+      }
+    }
+    return total;
+  }
+
+  function newPlayerId() {
+    return 'p' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36);
+  }
+
+  function addPlayer(name) {
+    name = String(name || '').trim().slice(0, 20);
+    if (!name) return 'empty';
+    var clash = players.list.some(function (p) {
+      return p.name.toLowerCase() === name.toLowerCase();
+    });
+    if (clash) return 'duplicate';
+    var p = { id: newPlayerId(), name: name };
+    players.list.push(p);
+    players.activeId = p.id;
+    savePlayers();
+    progress = load();
+    return null;
+  }
+
+  function switchPlayer(id) {
+    players.activeId = id;
+    savePlayers();
+    progress = load();
+  }
+
+  function renamePlayer(id, name) {
+    name = String(name || '').trim().slice(0, 20);
+    if (!name) return;
+    players.list.forEach(function (p) { if (p.id === id) p.name = name; });
+    savePlayers();
+  }
+
+  function removePlayer(id) {
+    if (players.list.length <= 1) return;      // never leave zero players
+    players.list = players.list.filter(function (p) { return p.id !== id; });
+    dropKey(progressKeyFor(id));
+    if (players.activeId === id) players.activeId = players.list[0].id;
+    savePlayers();
+    progress = load();
   }
 
   /* ---------------- helpers ---------------- */
@@ -102,6 +202,61 @@
       $(id).classList.toggle('is-active', id === screenId);
     });
     window.scrollTo(0, 0);
+  }
+
+  /* ---------------- who's playing ---------------- */
+
+  // Player names are the only user-authored strings this app renders.
+  function esc(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function renderPlayerChip() {
+    var p = activePlayer();
+    $('player-name').textContent = p.name;
+    $('player-avatar').textContent = p.name.charAt(0).toUpperCase();
+  }
+
+  function renderPlayerList() {
+    var wrap = $('player-list');
+    wrap.innerHTML = '';
+    var many = players.list.length > 1;
+    players.list.forEach(function (p) {
+      var row = document.createElement('div');
+      row.className = 'player-row' + (p.id === players.activeId ? ' active' : '');
+      row.innerHTML =
+        '<button class="player-pick" type="button" data-pick="' + p.id + '">' +
+          '<span class="avatar">' + esc(p.name.charAt(0).toUpperCase()) + '</span>' +
+          '<b>' + esc(p.name) + '</b>' +
+          '<span class="pstars">' + starsForPlayer(p.id) + ' ★</span>' +
+        '</button>' +
+        '<button class="player-edit" type="button" data-rename="' + p.id +
+          '" aria-label="Rename ' + esc(p.name) + '">✎</button>' +
+        (many ? '<button class="player-del" type="button" data-del="' + p.id +
+          '" aria-label="Remove ' + esc(p.name) + '">×</button>' : '');
+      wrap.appendChild(row);
+    });
+  }
+
+  function playerError(msg) {
+    var el = $('player-err');
+    el.textContent = msg || '';
+    el.classList.toggle('hidden', !msg);
+  }
+
+  function openPlayers() {
+    renderPlayerList();
+    playerError('');
+    $('new-player-name').value = '';
+    $('player-modal').classList.remove('hidden');
+  }
+
+  function closePlayers() {
+    $('player-modal').classList.add('hidden');
+    renderPlayerChip();
+    renderHome();
   }
 
   /* ---------------- home ---------------- */
@@ -459,10 +614,50 @@
     });
 
     $('reset-progress').addEventListener('click', function () {
-      if (!window.confirm('Wipe all scores and stars?')) return;
+      if (!window.confirm('Wipe all scores and stars for ' + activePlayer().name + '?')) return;
       progress = { scores: {} };
       save();
       renderHome();
+    });
+
+    $('player-chip').addEventListener('click', openPlayers);
+    $('close-players').addEventListener('click', closePlayers);
+    $('player-modal').addEventListener('click', function (e) {
+      if (e.target === $('player-modal')) closePlayers();   // tap the backdrop
+    });
+
+    $('player-list').addEventListener('click', function (e) {
+      var pick = e.target.closest('[data-pick]');
+      var del = e.target.closest('[data-del]');
+      var ren = e.target.closest('[data-rename]');
+      if (pick) { switchPlayer(pick.getAttribute('data-pick')); closePlayers(); return; }
+      if (ren) {
+        var id = ren.getAttribute('data-rename');
+        var cur = players.list.filter(function (p) { return p.id === id; })[0];
+        var next = window.prompt('Name for this player:', cur ? cur.name : '');
+        if (next !== null) { renamePlayer(id, next); renderPlayerList(); renderPlayerChip(); }
+        return;
+      }
+      if (del) {
+        var did = del.getAttribute('data-del');
+        var who = players.list.filter(function (p) { return p.id === did; })[0];
+        if (!who) return;
+        if (!window.confirm('Remove ' + who.name + '? Their stars are deleted with them.')) return;
+        removePlayer(did);
+        renderPlayerList();
+        renderPlayerChip();
+      }
+    });
+
+    $('add-player-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var err = addPlayer($('new-player-name').value);
+      if (err === 'empty') { playerError('Type a name first.'); return; }
+      if (err === 'duplicate') { playerError('Someone here already has that name.'); return; }
+      $('new-player-name').value = '';
+      playerError('');
+      renderPlayerList();
+      renderPlayerChip();
     });
 
     // The markup ships a literal year so the byline is correct with scripting
@@ -472,6 +667,7 @@
       el.textContent = year;
     });
 
+    renderPlayerChip();
     renderHome();
     show('screen-home');
   }

@@ -25,6 +25,12 @@
   </header>
 
   <div class="pad">
+    <button class="player-chip" id="player-chip" type="button">
+      <span class="avatar" id="player-avatar">P</span>
+      <span class="player-chip-txt"><span class="fine">Playing as</span><b id="player-name">Player 1</b></span>
+      <span class="switch-lbl">Switch</span>
+    </button>
+
     <div id="level-list" class="level-list"></div>
 
     <div class="card soft">
@@ -148,6 +154,21 @@
     <p class="credit">Built by Bret Bowser &nbsp;·&nbsp; &copy;&nbsp;<span class="yr">2026</span></p>
   </div>
 </section>
+
+<!-- ============ WHO'S PLAYING ============ -->
+<div class="modal hidden" id="player-modal">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="players-title">
+    <h3 id="players-title">Who's playing?</h3>
+    <p class="fine">Everyone sharing this phone keeps their own stars. Nothing leaves the device.</p>
+    <div id="player-list" class="player-list"></div>
+    <form id="add-player-form" class="add-row" autocomplete="off">
+      <input id="new-player-name" type="text" placeholder="Add a name" maxlength="20" aria-label="New player name">
+      <button type="submit" class="btn primary">Add</button>
+    </form>
+    <p class="fine err hidden" id="player-err"></p>
+    <button class="btn ghost" id="close-players" type="button">Done</button>
+  </div>
+</div>
 
 <script src="court.js"></script>
 <script src="scenarios.js"></script>

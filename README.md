@@ -9,7 +9,8 @@ You are always the **gold** player at the bottom of the screen. Your partner is
 **blue**. The opponents are **red**.
 
 No accounts, no server, no build step — it is three files of plain HTML, CSS and
-JavaScript. Progress is stored in the browser on each person's own phone.
+JavaScript. Progress is stored in the browser, and several people can share one
+phone without sharing stars.
 
 ---
 
@@ -206,6 +207,23 @@ Two layout rules protect that precision:
 - Landscape under 600px tall switches to a grid: court on the left at full
   height, coaching in a column on the right. Stacked, a landscape court was
   about 130px tall and effectively unplayable.
+
+### Several people, one phone
+
+There is no login, so progress lives in the browser — which used to mean anyone
+handing their phone to a friend had their stars overwritten. The home screen now
+carries a **Playing as** chip: tap it to switch player, add a name, rename or
+remove someone. Each player's scores live under their own storage key
+(`doublesiq.progress.v2::<playerId>`), the roster under
+`doublesiq.players.v1`.
+
+Nothing is transmitted anywhere; this separates people sharing a device, and is
+not authentication. Anyone using the phone can switch to any profile.
+
+Progress saved before profiles existed is adopted by the first player on
+upgrade, so no stars are lost. That migration runs independently of whether the
+roster was written first, and refuses to overwrite a profile that already has
+progress.
 
 ### How scoring works
 
