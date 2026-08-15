@@ -427,6 +427,13 @@
       renderHome();
     });
 
+    // The markup ships a literal year so the byline is correct with scripting
+    // off; this keeps it current without anyone having to remember.
+    var year = String(new Date().getFullYear());
+    Array.prototype.forEach.call(document.querySelectorAll('.yr'), function (el) {
+      el.textContent = year;
+    });
+
     renderHome();
     show('screen-home');
   }
