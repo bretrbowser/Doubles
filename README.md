@@ -49,23 +49,24 @@ If you'd rather keep it private, the alternative is to upgrade to GitHub Pro, or
 drag the folder onto [netlify.com/drop](https://app.netlify.com/drop), which
 hosts it free from a private source. Public is simpler.
 
-### Step 2 — Turn on GitHub Pages
+### Step 2 — Nothing. Pages turns itself on.
 
-1. In your repo, click **Settings** (top right of the repo, not your account settings).
-2. In the left sidebar, click **Pages**.
-3. Under **Build and deployment → Source**, choose **GitHub Actions** from the dropdown.
-
-That's the whole configuration. There is a file in this repo at
-`.github/workflows/deploy.yml` that does the publishing automatically.
+`.github/workflows/deploy.yml` passes `enablement: true` to the
+`actions/configure-pages` step, which switches GitHub Pages on through the API
+the first time it runs. There is no **Settings → Pages** step to remember.
 
 ### Step 3 — Watch it deploy
 
-Click the **Actions** tab. You'll see a job called *Deploy to GitHub Pages*
-running. It takes about a minute. When the dot turns green, your site is live at:
+Click the **Actions** tab. You'll see a job called *Deploy to GitHub Pages*.
+It takes about fifteen seconds. When the dot turns green, your site is live at:
 
 ```
 https://bretrbowser.github.io/Doubles/
 ```
+
+A **404 / "There isn't a GitHub Pages site here"** on the first visit usually
+means the deploy hasn't finished, or your browser cached the 404 — check the
+Actions tab is green, then hard-refresh (Cmd-Shift-R).
 
 Send that link to your friends. On an iPhone they can open it in Safari, tap the
 share button, and choose **Add to Home Screen** — it then behaves like an app,
