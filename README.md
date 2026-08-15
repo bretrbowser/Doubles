@@ -24,27 +24,30 @@ Some vocabulary first, because the rest of this makes no sense without it:
 | Word | What it actually means |
 |---|---|
 | **Repository** (repo) | A folder that GitHub stores for you, with a full history of every change. Yours is `bretrbowser/Doubles`. |
-| **Branch** | A parallel copy of the folder where work happens before it becomes official. The official one is usually called `main`. |
+| **Branch** | A parallel copy of the folder where work happens. The **default branch** is the official one — usually named `main`. |
 | **Commit** | A saved snapshot with a note explaining what changed. |
-| **Push** | Uploading your commits from your computer to GitHub. |
-| **Pull request** (PR) | A proposal to merge one branch into another, so you can look it over first. |
+| **Push** | Uploading commits to GitHub. |
+| **GitHub Actions** | A robot that runs a job every time you push. Ours publishes the website. |
 | **GitHub Pages** | A free web host built into GitHub. It serves the files in your repo as a real website. |
 
-The code for this app is already committed and pushed to a branch called
-`claude/tennis-doubles-coach-app-veb60y`. Nothing is on `main` yet.
+The code is committed and pushed, and because the repo was completely empty
+GitHub automatically made `claude/tennis-doubles-coach-app-veb60y` the **default
+branch**. So there is no merge and no pull request to do — the code is already
+where it needs to be. Skip straight to Step 1.
 
-### Step 1 — Get the code onto `main`
+### Step 1 — Make the repo public
 
-Go to <https://github.com/bretrbowser/Doubles>. GitHub will show a yellow banner
-about the recently pushed branch with a **Compare & pull request** button. Click it.
+Your repo is currently **private**, and GitHub Pages only works on private repos
+if you pay for GitHub Pro. On the free plan the site has to be public. There is
+nothing secret in here, so:
 
-If you don't see the banner, click the **Pull requests** tab, then **New pull
-request**, and set it to compare `main` ← `claude/tennis-doubles-coach-app-veb60y`.
+1. **Settings** (the tab along the top of the repo, not your account settings)
+2. Scroll to the very bottom, to the red **Danger Zone** box
+3. **Change visibility → Change to public**, and confirm by typing the repo name
 
-On the next screen click **Create pull request**, then **Merge pull request**,
-then **Confirm merge**. The code is now on `main`. (`main` doesn't exist yet? Then
-open the branch dropdown on the repo home page, pick the `claude/...` branch, and
-GitHub will offer to make it the default — that works too.)
+If you'd rather keep it private, the alternative is to upgrade to GitHub Pro, or
+drag the folder onto [netlify.com/drop](https://app.netlify.com/drop), which
+hosts it free from a private source. Public is simpler.
 
 ### Step 2 — Turn on GitHub Pages
 
@@ -70,12 +73,19 @@ full screen, no browser chrome.
 
 ### Step 4 — Every change from now on
 
-Any time anything is pushed to `main`, that workflow runs again and the live site
-updates by itself. You don't have to do anything else, ever.
+Any time anything is pushed to the default branch, that workflow runs again and
+the live site updates by itself. You don't have to do anything else, ever.
 
-> **If Step 3 fails:** the most common cause is skipping Step 2, or picking
-> "Deploy from a branch" instead of "GitHub Actions". Go back and check the
-> Source dropdown.
+> **If Step 3 fails:** the two common causes are skipping Step 1 (Pages refuses
+> to publish a private repo on a free plan) and picking "Deploy from a branch"
+> instead of "GitHub Actions" in the Source dropdown. Click the failed run in the
+> Actions tab — it says which.
+
+### Optional — rename the branch to `main`
+
+`claude/tennis-doubles-coach-app-veb60y` is an ugly name for your default branch.
+To tidy it up: **Settings → General → Default branch → the ✏️ pencil icon → rename
+to `main`**. Nothing breaks — the deploy workflow already listens for `main` too.
 
 ---
 
