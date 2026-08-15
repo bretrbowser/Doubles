@@ -118,11 +118,14 @@
         <p class="coach" id="coach-text"></p>
       </div>
     </div>
+    <!-- Fixed three-slot bar. Buttons are never added or removed — only
+         enabled or disabled — so the primary target never moves or resizes,
+         and the two secondary labels are constant strings so their widths
+         never change either. -->
     <div class="sheet-actions">
       <button class="btn ghost" id="hint-btn">Hint</button>
       <button class="btn ghost" id="replay-btn">Replay</button>
-      <button class="btn primary" id="lock-btn" disabled>Lock it in</button>
-      <button class="btn primary hidden" id="next-btn">Next</button>
+      <button class="btn primary" id="primary-btn" disabled>Lock it in</button>
     </div>
   </div>
 </section>

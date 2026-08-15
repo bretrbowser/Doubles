@@ -201,15 +201,22 @@ h1{font-size:40px;font-weight:800}
 .g-ok{color:var(--gold)}
 .g-bad{color:var(--red)}
 
-.sheet-actions{display:flex;gap:8px}
+.sheet-actions{display:flex;gap:8px;align-items:stretch}
 .btn{
   flex:1;border:0;border-radius:14px;padding:15px 12px;font:inherit;font-weight:700;font-size:16px;
+  min-height:52px;                       /* comfortably above the 44pt touch minimum */
   cursor:pointer;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  transition:opacity .15s;
 }
-.btn:active{transform:scale(.985)}
-.btn.primary{background:var(--lime);color:var(--ink);flex:1.6}
-.btn.primary:disabled{background:var(--panel-2);color:#6c8098}
-.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);flex:none;padding:15px 16px}
+.btn:active:not(:disabled){transform:scale(.985)}
+/* The primary always takes the leftover width, so it never moves or resizes as
+   its label changes between "Lock it in" and "Next ball". */
+.btn.primary{background:var(--lime);color:var(--ink);flex:1}
+.btn.primary:disabled{background:var(--panel-2);color:#6c8098;cursor:default}
+/* Secondary labels are constant strings, so sizing to content is stable. */
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line);flex:0 0 auto;padding:15px 16px}
+.btn.ghost:disabled{opacity:.35;cursor:default}
 .btn.small{font-size:14px;padding:12px;width:100%;margin-top:10px}
 .hidden{display:none !important}
 

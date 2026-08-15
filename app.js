@@ -14,7 +14,8 @@
     stepScores: [],
     pick: null,
     locked: false,
-    hintUsed: false
+    hintUsed: false,
+    phase: 'ask'          // 'ask' -> primary locks in; 'result' -> primary advances
   };
 
   var progress = load();
@@ -194,6 +195,7 @@
     state.pick = null;
     state.locked = false;
     state.hintUsed = false;
+    state.phase = 'ask';
 
     renderDots();
     Court.clearAll();
@@ -207,10 +209,9 @@
     $('ask-block').classList.remove('hidden');
     $('result-block').classList.add('hidden');
     $('hint-box').classList.add('hidden');
-    $('hint-btn').classList.remove('hidden');
-    $('lock-btn').classList.remove('hidden');
-    $('lock-btn').disabled = true;
-    $('next-btn').classList.add('hidden');
+    $('hint-btn').disabled = false;
+    $('primary-btn').textContent = 'Lock it in';
+    $('primary-btn').disabled = true;
     $('sheet-scroll').scrollTop = 0;
     updateFade();
 
@@ -233,12 +234,13 @@
     state.pick = p;
     var step = currentStep();
     Court.drawPick(p, step.you, step.kind);
-    $('lock-btn').disabled = false;
+    $('primary-btn').disabled = false;
   }
 
   function lockIn() {
     if (!state.pick || state.locked) return;
     state.locked = true;
+    state.phase = 'result';
 
     var step = currentStep();
     var d = Court.dist(state.pick, step.target);
@@ -257,11 +259,18 @@
 
     $('ask-block').classList.add('hidden');
     $('result-block').classList.remove('hidden');
-    $('hint-btn').classList.add('hidden');
-    $('lock-btn').classList.add('hidden');
-    $('next-btn').classList.remove('hidden');
-    $('next-btn').textContent =
-      state.stepIndex < state.scenario.steps.length - 1 ? 'Next ball' : 'Finish scenario';
+    $('hint-btn').disabled = true;
+
+    var primary = $('primary-btn');
+    primary.textContent =
+      state.stepIndex < state.scenario.steps.length - 1 ? 'Next ball' : 'See summary';
+    // The button under the thumb just changed meaning. Hold it inert briefly so
+    // a fast second tap cannot skip past coaching that was never read.
+    primary.disabled = true;
+    setTimeout(function () {
+      if (state.phase === 'result') primary.disabled = false;
+    }, 450);
+
     $('sheet-scroll').scrollTop = 0;
     updateFade();
   }
@@ -281,7 +290,8 @@
     var box = $('hint-box');
     box.textContent = currentStep().keyIdea;
     box.classList.remove('hidden');
-    $('hint-btn').classList.add('hidden');
+    $('hint-btn').disabled = true;
+    updateFade();
   }
 
   /* ---------------- summary ---------------- */
@@ -339,13 +349,13 @@
     $('sheet-scroll').addEventListener('scroll', updateFade, { passive: true });
     window.addEventListener('resize', updateFade);
 
-    $('lock-btn').addEventListener('click', lockIn);
-    $('next-btn').addEventListener('click', nextStep);
-    $('hint-btn').addEventListener('click', useHint);
-    $('replay-btn').addEventListener('click', function () {
-      if (state.locked) return;
-      playBall();
+    $('primary-btn').addEventListener('click', function () {
+      if (state.phase === 'ask') lockIn(); else nextStep();
     });
+    $('hint-btn').addEventListener('click', useHint);
+    // Replay stays live after the answer too: re-watching the point with the
+    // coach's spot already on screen is the most useful time to see it.
+    $('replay-btn').addEventListener('click', playBall);
     $('quit-btn').addEventListener('click', function () {
       Court.stopAnim();
       openLevel(state.levelId);
