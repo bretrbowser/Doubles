@@ -161,6 +161,15 @@ points to screen-right. For the opponents it is mirrored: their deuce court is
 `x < 0`, which is why a deuce-court serve travels diagonally from `x = +7` down
 to a landing spot around `x = -6`.
 
+> **Naming rule when you write coach text.** Because the two teams' deuce courts
+> are *diagonally opposite*, the phrase "their deuce side" points at the opposite
+> screen half from "your deuce side" — and readers reasonably assume one word
+> means one place. So: use **deuce/ad only for your own half, and always say
+> "your"**. Describe the opponents' half by the side of the screen it is on
+> ("the left half"). The four corners of the court carry standing labels
+> (`THEIR DEUCE`, `THEIR AD`, `YOUR AD`, `YOUR DEUCE`) so the mirror is always
+> visible rather than something the player has to hold in their head.
+
 Behind-the-baseline positions use values past ±39 (a server stands at `y = 40.5`).
 
 ### Adding a scenario

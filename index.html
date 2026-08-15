@@ -35,6 +35,7 @@
         <li>Lock it in. You get the coach's answer, the reasoning, and a score.</li>
       </ol>
       <p class="fine">You are always the gold player at the <em>bottom</em> of the screen. Your partner is blue, opponents are red.</p>
+      <p class="fine" style="margin-top:10px"><strong style="color:#eaf2fb">Deuce and ad are mirrored.</strong> Your deuce court is the <em>right</em> half of your side — but the opponents' deuce court is the <em>left</em> half of theirs, diagonally across. That is why a deuce-court serve travels diagonally. The four corners of the court are labelled so you never have to work it out.</p>
     </div>
 
     <label class="card soft toggle">
@@ -87,18 +88,26 @@
         <line x1="-21" y1="-1.9" x2="-21" y2="1.9" class="post"/>
         <line x1="21" y1="-1.9" x2="21" y2="1.9" class="post"/>
       </g>
+      <!-- Standing orientation aid. The two teams' deuce courts are DIAGONALLY
+           OPPOSITE, so naming a screen half only works if you say whose it is.
+           Showing all four at once makes the mirror obvious at a glance. -->
+      <g class="court-labels" aria-hidden="true">
+        <text x="-9" y="-45.6">THEIR DEUCE</text>
+        <text x="9"  y="-45.6">THEIR AD</text>
+        <text x="-9" y="47.3">YOUR AD</text>
+        <text x="9"  y="47.3">YOUR DEUCE</text>
+      </g>
       <g id="layer-guides"></g>
       <g id="layer-actors"></g>
       <g id="layer-path"></g>
       <g id="layer-pick"></g>
     </svg>
-    <div id="tap-hint" class="tap-hint">Tap the court</div>
   </div>
 
   <div class="sheet" id="sheet">
     <div class="sheet-scroll" id="sheet-scroll">
       <div id="ask-block">
-        <p class="eyebrow" id="ask-kind">Where do you move?</p>
+        <p class="eyebrow" id="ask-kind">Tap where you should move</p>
         <p class="prompt" id="prompt-text"></p>
         <div id="hint-box" class="hint-box hidden"></div>
       </div>

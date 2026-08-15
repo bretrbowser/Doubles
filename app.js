@@ -199,7 +199,8 @@
     Court.clearAll();
     Court.drawFrame(step);
 
-    $('ask-kind').textContent = step.kind === 'hit' ? 'Where do you hit it?' : 'Where do you move?';
+    $('ask-kind').textContent = step.kind === 'hit'
+      ? 'Tap where the ball should land' : 'Tap where you should move';
     $('prompt-text').textContent =
       (state.stepIndex === 0 ? state.scenario.situation + ' ' : '') + step.prompt;
 
@@ -212,8 +213,6 @@
     $('next-btn').classList.add('hidden');
     $('sheet-scroll').scrollTop = 0;
     updateFade();
-    $('tap-hint').classList.remove('hidden');
-    $('tap-hint').textContent = step.kind === 'hit' ? 'Tap where the ball should land' : 'Tap where you should move';
 
     playBall();
   }
@@ -235,7 +234,6 @@
     var step = currentStep();
     Court.drawPick(p, step.you, step.kind);
     $('lock-btn').disabled = false;
-    $('tap-hint').classList.add('hidden');
   }
 
   function lockIn() {

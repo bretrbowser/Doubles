@@ -4,7 +4,13 @@
    Coordinates are in FEET (see court.js for the axes).
    Your team is always at the BOTTOM: your baseline is y = +39.
    Your deuce court is x > 0, your ad court is x < 0.
-   The opponents' deuce court is x < 0 (mirrored).
+   The opponents' deuce court is x < 0 -- diagonally opposite yours.
+
+   NAMING RULE for the coach text: only ever say "deuce"/"ad" about YOUR
+   half, and always say "your". Describe the opponents' half by which side
+   of the screen it is on ("the left half"), never as "their deuce side" --
+   the two teams' deuce courts are opposite screen halves and readers
+   reasonably assume one word means one place.
 
    Each step is one decision:
      kind    'move'  -> tap where YOU should go
@@ -214,7 +220,7 @@ var SCENARIOS = [
       target: { x: 4.5, y: 40.5 },
       perfect: 3, good: 6,
       keyIdea: "Don't run to the center mark. You only have to cover what your partner doesn't — the crosscourt reply and the lob.",
-      coach: "The returner is stretched out wide on their deuce side. The two things that can realistically come to you are the crosscourt return, which lands on your deuce half, and a lob. The down-the-line return goes straight at your partner at the net — that's their ball, not yours. So recover a couple of steps to the deuce side of center and stay a step behind the baseline for time. Standing on the center mark means you are two steps too far from every ball that's actually coming."
+      coach: "A deuce-court serve always crosses to the receiver's deuce court, and theirs is the far half diagonally opposite yours -- so serving wide from your right has dragged the returner off the far LEFT edge of the screen. The two things that can realistically come back to you are the crosscourt return, which lands on your deuce half (your right), and a lob. The down-the-line return goes straight at your partner at the net — that's their ball, not yours. So recover a couple of steps to your deuce side of center -- your right -- and stay a step behind the baseline for time. Standing on the center mark means you are two steps too far from every ball that's actually coming."
     },
     {
       kind: 'move',
@@ -270,7 +276,7 @@ var SCENARIOS = [
     },
     {
       kind: 'hit',
-      prompt: 'You have a chest-high volley in the middle of the court, both opponents deep on their deuce side. Where do you hit it?',
+      prompt: 'You have a chest-high volley in the middle of the court. Both opponents have ended up deep on the left half of the screen. Where do you hit it?',
       you: { x: 0.5, y: 5 },
       partner: { x: 4, y: 40 },
       opp1: { x: -11, y: -38 },
@@ -279,7 +285,7 @@ var SCENARIOS = [
       target: { x: 8, y: -14 },
       perfect: 5, good: 11,
       keyIdea: 'Hit into the space they have both vacated — not back at the player you can see.',
-      coach: "Both opponents have collapsed onto their deuce side. The whole ad half of their court is empty, and it is a big target that requires no precision at all. Take the ball in front of you and put it there, deep enough that neither of them can run it down. The classic error is volleying at the opponent nearest you because that's who you're looking at. Look at the space instead. Second-best option if they'd covered it: down at the feet of the closest opponent, forcing them to hit up again."
+      coach: "Both opponents have collapsed onto the left half of the court. The whole right half of their side is empty, and it is a big target that requires no precision at all. Take the ball in front of you and put it there, deep enough that neither of them can run it down. The classic error is volleying at the opponent nearest you because that's who you're looking at. Look at the space instead. Second-best option if they'd covered it: down at the feet of the closest opponent, forcing them to hit up again."
     },
     {
       kind: 'move',
@@ -292,7 +298,7 @@ var SCENARIOS = [
       target: { x: 6.5, y: 7 },
       perfect: 4, good: 9,
       keyIdea: 'A poach is a switch. You keep going to the other side; your partner crosses behind you.',
-      coach: "You crossed the middle, so you now live on the deuce side and your partner takes the ad side — say 'Switch!' out loud as you go so they're already moving. The classic disaster is poaching and then drifting apologetically back to your original side, which leaves both of you standing on the same half of the court with a wide-open court beside you. Once you commit, commit. And close a step or two toward the net: they're scrambling, the reply will be weak, and you want to end this."
+      coach: "You crossed the middle, so you now live on your deuce side (the right) and your partner takes your ad side (the left) — say 'Switch!' out loud as you go so they're already moving. The classic disaster is poaching and then drifting apologetically back to your original side, which leaves both of you standing on the same half of the court with a wide-open court beside you. Once you commit, commit. And close a step or two toward the net: they're scrambling, the reply will be weak, and you want to end this."
     }
   ]
 },
@@ -315,7 +321,7 @@ var SCENARIOS = [
       target: { x: 4, y: 39.5 },
       perfect: 3.5, good: 8,
       keyIdea: 'Not the center mark. Split the angles they have — and remember your partner covers their side of the net.',
-      coach: "Draw the two most extreme shots your opponent can hit from where they're standing, and stand halfway between where those two would land. From their deuce corner, that bisector sits close to the middle of your court — and because your partner at the net covers the ad side, you shade a step or two further to your deuce side. This is why 'recover to the center mark' fails: the center mark is a fixed point on a court where nothing is fixed. The reference is always the ball."
+      coach: "Draw the two most extreme shots your opponent can hit from where they're standing, and stand halfway between where those two would land. From that far corner on your left, the bisector sits close to the middle of your court — and because your partner at the net covers your ad side, you shade a step or two further to your deuce side, on your right. This is why 'recover to the center mark' fails: the center mark is a fixed point on a court where nothing is fixed. The reference is always the ball."
     },
     {
       kind: 'move',
@@ -376,7 +382,7 @@ var SCENARIOS = [
       ballPath: [{ x: -8, y: -14 }, { x: -6, y: -8 }, { x: -1, y: 30 }, { x: -1.5, y: 38 }],
       target: { x: -11, y: 39.5 },
       perfect: 5, good: 10,
-      keyIdea: 'You are in the deuce court now, so the middle forehand belongs to your partner. Cover your own side instead.',
+      keyIdea: 'You are in your deuce court now — the right half — so the middle forehand belongs to your partner. Cover your own side instead.',
       coach: "This is the part of switching that teams forget. Responsibilities swap with positions: your partner is now the ad-court player, so for two right-handers the middle ball is theirs, taken with the forehand. Your job is to hold your side and not converge on a ball that isn't yours — two players lunging at the same volley leaves an entire half of the court empty. Call it early, trust the call, and cover what's left."
     }
   ]
@@ -492,7 +498,7 @@ var SCENARIOS = [
     },
     {
       kind: 'move',
-      prompt: 'You signalled that you are going to the deuce side, and your partner serves down the T. The instant the ball passes you — where do you go?',
+      prompt: 'You signalled that you are breaking to your deuce side — the right half of the screen — and your partner serves down the T. The instant the ball passes you — where do you go?',
       you: { x: 0, y: 5.5 },
       partner: { x: 2, y: 40.5 },
       opp1: { x: -8, y: -40 },
@@ -501,7 +507,7 @@ var SCENARIOS = [
       target: { x: 5, y: 6 },
       perfect: 3.5, good: 8,
       keyIdea: 'Commit to the side you signalled and close toward the net. Do not wait to see the return.',
-      coach: "You move on the signal, not on the ball — that's the whole contract. If you start reading the return you'll be caught in the middle covering nothing, and worse, your partner won't know which half is theirs. Break to the deuce side and gain ground toward the net as you go, because the T serve you paired this with forces the return through the small area you're travelling into. The server covers the ad half; that was agreed before the point. When it goes wrong, it went wrong because someone improvised."
+      coach: "You move on the signal, not on the ball — that's the whole contract. If you start reading the return you'll be caught in the middle covering nothing, and worse, your partner won't know which half is theirs. Break to your deuce side and gain ground toward the net as you go, because the T serve you paired this with forces the return through the small area you're travelling into. The server covers your ad half; that was agreed before the point. When it goes wrong, it went wrong because someone improvised."
     },
     {
       kind: 'move',
@@ -514,7 +520,7 @@ var SCENARIOS = [
       target: { x: 3, y: 4 },
       perfect: 3, good: 7,
       keyIdea: 'Take it early and high, in front of you, still moving forward.',
-      coach: "This is exactly the ball the formation was designed to produce — a hesitant return into the space you're already running through. Meet it in front of you and above the net so you can hit down, rather than letting it drop while you get comfortable. Look at where the opponents are before you strike: the returner is out of position on their deuce side and their partner is stuck on the service line, so the deep ad corner behind them is completely open."
+      coach: "This is exactly the ball the formation was designed to produce — a hesitant return into the space you're already running through. Meet it in front of you and above the net so you can hit down, rather than letting it drop while you get comfortable. Look at where the opponents are before you strike: the returner is stranded out on the left edge of the screen and their partner is stuck on the service line, so the deep corner away on the right is completely open."
     }
   ]
 },
@@ -528,7 +534,7 @@ var SCENARIOS = [
   steps: [
     {
       kind: 'move',
-      prompt: 'You are serving to the deuce court in Australian formation — your partner is already lined up in the deuce service box, on the same side as you. Where do you stand to serve?',
+      prompt: 'You are serving to the deuce court in Australian formation. Instead of standing in your ad box as usual, your partner is lined up in YOUR deuce box — the same half you are serving from. Where do you stand to serve?',
       you: { x: 7, y: 40.5 },
       partner: { x: 6, y: 9 },
       opp1: { x: -10, y: -40 },
@@ -537,7 +543,7 @@ var SCENARIOS = [
       target: { x: 2, y: 40.5 },
       perfect: 3, good: 7,
       keyIdea: 'Right next to the center mark — you have a long way to run after you hit it.',
-      coach: "Stack both of you on the deuce side and the crosscourt return simply has nowhere to land. But that means your entire ad half is empty, and you are the only one who can cover it. Serve from close to the center mark to shorten the sprint. It also narrows the serve angle you have available, which is fine — in Australian the serve you want is down the T anyway, so the return has to travel across the front of your onrushing partner."
+      coach: "Stack both of you on your deuce side and the crosscourt return simply has nowhere to land. But that means your entire ad half — the left — is empty, and you are the only one who can cover it. Serve from close to the center mark to shorten the sprint. It also narrows the serve angle you have available, which is fine — in Australian the serve you want is down the T anyway, so the return has to travel across the front of your onrushing partner."
     },
     {
       kind: 'move',
@@ -549,8 +555,8 @@ var SCENARIOS = [
       ballPath: [{ x: 2, y: 40.5 }, { x: -1.5, y: -19 }, { x: -10, y: -40 }],
       target: { x: -8, y: 38 },
       perfect: 4, good: 9,
-      keyIdea: 'Cross to the empty ad side immediately and split step as they contact the ball.',
-      coach: "The moment the serve leaves your racket, run. Australian is a deliberate trade: you take away their favourite shot and give them the down-the-line, and the down-the-line is your responsibility to cover. Get across to your ad half, behind the baseline, and split step as they strike it — you have to be stopped and balanced or the extra step you gained by leaving early is wasted. Servers who admire the serve for half a second before crossing get passed down the line every time, and then blame the formation."
+      keyIdea: 'Cross to your empty ad side — the left — immediately, and split step as they contact the ball.',
+      coach: "The moment the serve leaves your racket, run. Australian is a deliberate trade: you take away their favourite shot and give them the down-the-line, and the down-the-line is your responsibility to cover. Get across to your ad half on the left, behind the baseline, and split step as they strike it — you have to be stopped and balanced or the extra step you gained by leaving early is wasted. Servers who admire the serve for half a second before crossing get passed down the line every time, and then blame the formation."
     },
     {
       kind: 'hit',
@@ -661,7 +667,7 @@ var SCENARIOS = [
       target: { x: 2, y: 7.5 },
       perfect: 3.5, good: 8,
       keyIdea: 'Above the net means go. Close hard and take it out of the air.',
-      coach: "Now you close, and you close all the way — this is the ball you accepted the ugly half-volley to earn. Move forward through the shot rather than reaching for it from where you're standing, so that contact happens above the net and in front of you and you can hit down. From that position their net player's feet and the open ad court are both available, and either one ends the point. Green light and red light are both decided by their contact point, every single time."
+      coach: "Now you close, and you close all the way — this is the ball you accepted the ugly half-volley to earn. Move forward through the shot rather than reaching for it from where you're standing, so that contact happens above the net and in front of you and you can hit down. From that position their net player's feet and the deep corner on your right behind them are both available, and either one ends the point. Green light and red light are both decided by their contact point, every single time."
     }
   ]
 },
@@ -675,7 +681,7 @@ var SCENARIOS = [
   steps: [
     {
       kind: 'move',
-      prompt: 'You are returning in the deuce court and their net player has broken early on both of the last two returns. Adjust your starting position.',
+      prompt: 'You are returning in your deuce court — the right half — and their net player has broken early on both of the last two returns. Adjust your starting position.',
       you: { x: 10.5, y: 41 },
       partner: { x: -7, y: 21 },
       opp1: { x: -7, y: -40.5 },
